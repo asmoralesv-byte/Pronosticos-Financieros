@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agroindustrias del Tolima S.A.S. (Grupo 3) - Dashboard Analítico y Pronósticos Financieros</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js y Plugin Zoom -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+
+    <style>
+        :root {
+            --rose-gold: #b76e79;
+            --rose-gold-light: #d4a5a5;
+            --pastel-pink: #f3e6e8;
+            --pearl-white: #fdfbfb;
+            --dark-contrast: #2c3e50;
+            --gray-subtle: #8a96a3;
+            --shadow: rgba(183, 110, 121, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--pearl-white) 0%, #ebedee 100%);
+            color: var(--dark-contrast);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            color: var(--rose-gold);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 30px var(--shadow);
+        }
+
+        .hero-section h1 {
+            font-size: 2.8rem;
+            color: var(--dark-contrast);
+            margin-bottom: 0;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-top: 1px solid rgba(183, 110, 121, 0.2);
+            font-size: 1.1rem;
+            color: var(--dark-contrast);
+        }
+
+        .footer .highlight {
+            color: var(--rose-gold);
+            font-weight: 700;
+        }
+
+        /* Sticky Navigation */
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(253, 251, 251, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(183, 110, 121, 0.2);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            padding: 10px 18px;
+            margin: 5px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--dark-contrast);
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.4s ease;
+        }
+
+        .tab-btn:hover {
+            background: var(--pastel-pink);
+            color: var(--rose-gold);
+        }
+
+        .tab-btn.active {
+            background: var(--rose-gold);
+            color: white;
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--rose-gold-light);
+        }
+
+        /* Main Content */
+        .content-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 40px var(--shadow);
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tables */
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px var(--shadow);
+            margin: 25px 0;
+            border: 1px solid rgba(183, 110, 121, 0.2);
+            background: white;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--pastel-pink);
+        }
+
+        .styled-table th {
+            background: var(--rose-gold);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .styled-table tbody tr {
+            transition: background-color 0.3s ease;
+        }
+
+        .styled-table tbody tr:nth-of-type(even) {
+            background-color: rgba(243, 230, 232, 0.3);
+        }
+
+        .styled-table tbody tr:hover {
+            background-color: var(--pastel-pink);
+        }
+
+        /* Charts */
+        .chart-container {
+            width: 100%;
+            max-width: 950px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px var(--shadow);
+            border: 1px solid rgba(183, 110, 121, 0.1);
+        }
+
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero-section">
+        <h1>Diplomado en Análisis de Datos: Fundamentos y Aplicaciones en Power BI</h1>
+    </header>
+
+    <nav class="sticky-nav">
+        <button class="tab-btn active" onclick="openTab(event, 'tab-0')">Contextualización del caso</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-1')">Generación de datos</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-2')">Análisis exploratorio</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-3')">Último valor</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-4')">Promedio simple</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-5')">Promedio móvil</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-6')">Suavización exp. simple</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-7')">Suavización exp. doble (Holt)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-8')">Regresión lineal</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-9')">ARIMA(1,1,1)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-10')">Validación (Métricas)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-11')">Comparación Excel vs IA</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-12')">Recomendaciones Gerenciales y Plan de Acción</button>
+    </nav>
+
+    <main class="content-container">
+
+        <!-- TAB 0 -->
+        <section id="tab-0" class="tab-content active">
+            <h3>0. Contextualización del caso y Formulación Inicial de Hipótesis</h3>
+            
+            <h4>0.1 Contexto Operativo y Planteamiento de Hipótesis</h4>
+            <p>Dado el contexto operativo de Agroindustrias del Tolima S.A.S., se formula la hipótesis de que la demanda mensual del Grupo 3 experimenta una contracción estructural continua, estimada en una caída del 3% mensual. Sin embargo, esta tendencia decreciente se encuentra severamente enmascarada por un ruido estadístico extremo (22.5%), lo que genera un alto grado de incertidumbre en la planeación de la producción.</p>
+            <p>Se hipotetiza que el factor de estacionalidad (±5%) tendrá un impacto marginal frente a la volatilidad aleatoria. En consecuencia, los métodos de pronóstico tradicionales que asuman estabilidad en la demanda fracasarán, sobrestimando los requerimientos futuros y provocando un grave problema de sobrestock (penalizado con un 8% de costo de almacenamiento). Para mitigar este riesgo, la empresa requerirá modelos avanzados que logren filtrar el ruido y rastrear matemáticamente la caída de las ventas a mediano y largo plazo.</p>
+        </section>
+
+        <!-- TAB 1 -->
+        <section id="tab-1" class="tab-content">
+            <h3>1. Generación de datos aleatorios controlados (Grupo 3)</h3>
+            
+            <h4>1.1 Parámetros utilizados (Grupo 3)</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Variable</th><th>Valor / Condición</th></tr></thead>
+                    <tbody>
+                        <tr><td>Rango de Ventas</td><td>30.000 – 100.000</td></tr>
+                        <tr><td>Tendencia</td><td>Decreciente -3% mensual</td></tr>
+                        <tr><td>Estacionalidad</td><td>Baja (±5%)</td></tr>
+                        <tr><td>Ruido Estadístico</td><td>20% – 25% (Usamos 22.5%)</td></tr>
+                        <tr><td>Costos de almacenamiento (Sobrestock)</td><td>8%</td></tr>
+                        <tr><td>Costo de desabastecimiento (Lucro cesante)</td><td>15%</td></tr>
+                        <tr><td>Periodos generados</td><td>100 periodos simulados (ventana de análisis de 30 periodos)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>1.2 Tabla de Datos Generados (100 Periodos)</h4>
+            <div class="table-container">
+                <table class="styled-table" id="tabla-100-periodos"></table>
+            </div>
+
+            <h4>1.3 Comportamiento Gráfico de la Serie (100 Periodos)</h4>
+            <div class="chart-container"><canvas id="chart-100"></canvas></div>
+            <p><strong>Análisis Visual de la Gráfica:</strong> La serie simulada de 100 periodos evidencia claramente la contracción estructural del -3% mensual combinada con el ruido estadístico extremo del 22.5%, descendiendo desde valores iniciales superiores a las 125.000 unidades hasta niveles cercanos a las 5.600 unidades en el periodo 100.</p>
+        </section>
+
+        <!-- TAB 2 -->
+        <section id="tab-2" class="tab-content">
+            <h3>2. Análisis Exploratorio de Datos (EDA)</h3>
+            
+            <h4>2.1 Contexto y Propósito del Análisis</h4>
+            <p>El presente informe detalla el Análisis Exploratorio de Datos (EDA) aplicado a la serie de tiempo histórica de Agroindustrias del Tolima S.A.S., correspondiente a las ventas mensuales simuladas del Grupo 3 durante un periodo de 36 meses. El objetivo principal de este análisis es diagnosticar el comportamiento real de la demanda, identificar patrones estructurales ocultos y dimensionar la volatilidad del mercado. Esta fundamentación estadística es un requisito indispensable antes de seleccionar y parametrizar cualquier modelo de pronóstico predictivo, garantizando así que las decisiones logísticas y de inventario se basen en evidencia cuantitativa robusta.</p>
+
+            <h4>2.2 Análisis de Medidas de Tendencia Central</h4>
+            <p>Al examinar las medidas de tendencia central de la serie histórica, se evidencia una clara asimetría en la distribución de las ventas. La media aritmética de las ventas se sitúa en $60.162 unidades monetarias, mientras que la mediana se ubica significativamente por debajo, en $55.023. Desde una perspectiva gerencial, esta discrepancia de más de 5.000 unidades indica que el promedio está siendo arrastrado artificialmente hacia arriba por los picos de ventas excepcionales registrados en los primeros meses de la serie (cercanos a las 100.000 unidades). La mediana, al ser resistente a estos valores atípicos, refleja de manera más fiel la realidad operativa reciente de la empresa. Por consiguiente, asumir la media como el volumen "normal" de ventas conduciría irremediablemente a una sobreestimación sistemática de la demanda, desencadenando excesos de inventario.</p>
+
+            <h4>2.3 Evaluación de la Dispersión y Volatilidad (Ruido Estadístico)</h4>
+            <p>El factor más crítico identificado en el Grupo 3 es la extrema volatilidad de los datos, producto de un ruido estadístico severo del 22.5%. La desviación estándar calculada para los 36 meses asciende a $22.969 unidades. Al relacionar esta dispersión con la media, obtenemos un Coeficiente de Variación (CV) superior al 38%. En el ámbito de la planeación de la cadena de suministro, un CV mayor al 20% ya se considera de alto riesgo. En el caso de Agroindustrias del Tolima, este nivel de incertidumbre del 38% significa que la fábrica enfrenta fluctuaciones mensuales impredecibles que destruyen cualquier intento de planificar una producción lineal. Los costos asociados a esta volatilidad son altísimos: si la demanda real resulta menor a la esperada, la empresa asume un costo de almacenamiento del 8%; y si es mayor, enfrenta un costo de desabastecimiento del 15% por lucro cesante.</p>
+
+            <h4>2.4 Análisis de Rango y Percentiles</h4>
+            <p>Para comprender mejor la magnitud de esta dispersión, es imperativo analizar los percentiles. El Percentil 10 se ubica en $34.855, mientras que el Percentil 90 alcanza los $92.822. Esto demuestra que, incluso descartando el 20% de los meses más extremos (el 10% más bajo y el 10% más alto), el rango de operación "habitual" de la empresa abarca una brecha colosal de casi 58.000 unidades. Esta enorme amplitud entre bandas de probabilidad confirma que el mercado no es estable. La representación gráfica de estos datos a través de un Diagrama de Cajas y Bigotes (Boxplot) ilustra visualmente una caja extendida con bigotes largos, validando que Agroindustrias del Tolima no puede depender de inventarios de seguridad fijos, ya que la amplitud del riesgo supera cualquier margen operativo razonable.</p>
+
+            <h4>2.5 Descomposición Estructural: Tendencia y Estacionalidad</h4>
+            <p>Adicional a la volatilidad, la serie de tiempo presenta componentes estructurales subyacentes. El comportamiento macro de las ventas muestra una tendencia claramente decreciente, con una tasa de contracción proyectada del -3% mensual. Este declive progresivo es el mayor desafío a largo plazo para la compañía, pues el tamaño del mercado se está reduciendo. Paralelamente, la serie contiene un componente de estacionalidad baja, oscilando en un rango de ±5%. Sin embargo, es vital destacar que esta ligera estacionalidad queda casi totalmente invisibilizada por el abrumador ruido estadístico del 22.5%. En términos prácticos, el ruido enmascara las pequeñas variaciones estacionales, haciendo ineficiente el uso de modelos complejos de descomposición estacional (como Winters) para este escenario específico.</p>
+
+            <h4>2.6 Análisis de Autocorrelación (ACF)</h4>
+            <p>El estudio de la Función de Autocorrelación (ACF) corrobora la fuerte dependencia temporal de los datos. En el primer rezago (Lag 1), se observa una autocorrelación alta de 0.82, indicando que las ventas de un mes están fuertemente influenciadas por el comportamiento del mes inmediatamente anterior. Esta correlación disminuye progresivamente en el rezago 2 (0.74) y el rezago 3 (0.71). El decaimiento paulatino de los coeficientes de autocorrelación confirma matemáticamente la presencia de una tendencia, validando la hipótesis de que la serie no es estacionaria y que el pasado reciente tiene mayor poder predictivo que el pasado lejano.</p>
+
+            <h4>2.7 Conclusiones sobre el comportamiento y selección preliminar de métodos</h4>
+            <p>En conclusión, el Análisis Exploratorio de Datos certifica que Agroindustrias del Tolima S.A.S. (Grupo 3) opera en un entorno hostil caracterizado por una fuerte caída estructural de las ventas y una volatilidad extrema que imposibilita la predicción a corto plazo. Ante este diagnóstico, se descartan de forma categórica y preliminar los modelos estáticos como el Método de Último Valor (Naïve) y el Promedio Simple. Estos enfoques rudimentarios están diseñados para series estacionarias y estables, por lo que aplicarlos en este contexto resultaría en pronósticos gravemente inflados y desfasados.</p>
+            <p>La estrategia metodológica exige obligatoriamente transitar hacia modelos avanzados de Suavización Exponencial. En primera instancia, se requerirá evaluar la Suavización Exponencial Simple (SES) con distintos valores de constante de suavización (Alfa) para lograr amortiguar el severo ruido del 22.5%. Posteriormente, y de manera definitiva, será imprescindible implementar el Método de Holt (Suavización Exponencial Doble). La inclusión del parámetro de tendencia (Beta) en el modelo de Holt es la única alternativa analítica viable para que el algoritmo rastree matemáticamente la caída mensual del 3% y proyecte de forma descendente los requerimientos futuros, protegiendo así a la empresa de los destructivos costos por exceso de inventario (8%).</p>
+        </section>
+
+        <!-- TAB 3 -->
+        <section id="tab-3" class="tab-content">
+            <h3>3. Pronóstico con el método del último valor (Naïve)</h3>
+            
+            <h4>3.1 Tabla Completa de Pronósticos (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-ultimo-valor"></table></div>
+
+            <h4>3.2 Gráfico comparativo (Real vs Pronóstico)</h4>
+            <div class="chart-container"><canvas id="chart-ultimo-valor"></canvas></div>
+
+            <h4>3.3 Análisis Crítico del Método de Último Valor (Naïve)</h4>
+            <p>El método de Último Valor asume que la demanda del próximo periodo será exactamente igual a la del periodo inmediatamente anterior. Es un modelo apropiado únicamente como línea base comparativa o en entornos de extrema volatilidad donde los datos históricos antiguos pierden relevancia por completo. Su principal limitación en Agroindustrias del Tolima es que replica ciegamente el ruido estadístico del 22.5%; si en el mes anterior hubo un pico de demanda falso, el modelo ordenará a la fábrica producir esa misma cantidad, generando sobrestock inmediato.</p>
+            <p>Este método no captura matemáticamente ni la tendencia ni la estacionalidad, simplemente las desplaza un periodo hacia adelante. Para este caso de estudio, debe descartarse por completo como herramienta de decisión, ya que su incapacidad para filtrar el ruido generó un Error Cuadrático Medio (MSE) inaceptable de 175.1 millones, exponiendo a la empresa al temido efecto látigo en sus inventarios.</p>
+        </section>
+
+        <!-- TAB 4 -->
+        <section id="tab-4" class="tab-content">
+            <h3>4. Pronóstico con promedio simple</h3>
+            
+            <h4>4.1 Tabla Completa de Pronósticos (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-prom-simple"></table></div>
+
+            <h4>4.2 Gráfico comparativo (Real vs Pronóstico)</h4>
+            <div class="chart-container"><canvas id="chart-promedio-simple"></canvas></div>
+
+            <h4>4.3 Análisis Crítico del Método de Promedio Simple</h4>
+            <p>El Promedio Simple calcula la media aritmética de todos los datos históricos disponibles, otorgando el mismo peso al mes 1 que al mes 36. Este método solo es apropiado en entornos macroeconómicos perfectamente estables, donde los productos se encuentran en una fase de madurez plana sin fluctuaciones. Sus limitaciones son absolutas en este caso: es completamente ciego a los cambios recientes y suaviza los datos con tanta agresividad que aplana la realidad.</p>
+            <p>Al igual que el método Naïve, no captura estacionalidad ni tendencia bajo ninguna circunstancia. Para el Grupo 3, este método debe ser descartado de inmediato y catalogado como un riesgo financiero. Al promediar los meses iniciales (ventas de 90.000 a 100.000 unidades) con los recientes (cercanos a 30.000), el modelo sugiere producir sistemáticamente más de 60.000 unidades a futuro. Implementar este pronóstico colapsaría las bodegas de la empresa, disparando los costos de almacenamiento del 8% y comprometiendo gravemente el flujo de caja. Su MSE asciende a 558.6 millones, siendo el peor de todos los métodos evaluados.</p>
+        </section>
+
+        <!-- TAB 5 -->
+        <section id="tab-5" class="tab-content">
+            <h3>5. Pronóstico con promedio móvil</h3>
+            
+            <h4>5.1 Tabla Completa de Pronósticos n=3, n=6 y n=12 con Errores (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-movil"></table></div>
+
+            <h4>5.2 Gráficos superpuestos de los modelos (n=3, n=6, n=12)</h4>
+            <div class="chart-container"><canvas id="chart-promedio-movil"></canvas></div>
+
+            <h4>5.3 Análisis Crítico de los Promedios Móviles</h4>
+            <p>El método de Promedios Móviles (evaluado con n=3, 6 y 12) busca suavizar la serie de tiempo calculando la media de los últimos "n" periodos, descartando la historia más antigua. Es apropiado en situaciones donde la demanda tiene variaciones aleatorias moderadas y se desea un equilibrio entre estabilidad y respuesta rápida. Sin embargo, sus limitaciones en este caso son evidentes: siempre va un paso atrás de la realidad (rezago sistemático) y es incapaz de proyectar tendencias.</p>
+            <p>Ninguno de los tres escenarios (n=3, 6, 12) captura la caída del 3% mensual; simplemente generan una línea escalonada que persigue tardíamente el descenso de las ventas. Aunque el escenario de n=3 arrojó el mejor MSE dentro de esta categoría (174.3 millones), se descarta su uso porque sigue asumiendo que el futuro próximo será un promedio horizontal del pasado reciente, lo cual resultará invariablemente en sobrestock para Agroindustrias del Tolima.</p>
+        </section>
+
+        <!-- TAB 6 -->
+        <section id="tab-6" class="tab-content">
+            <h3>6. Suavización exponencial simple (SES)</h3>
+            
+            <h4>6.1 Tabla Completa de Pronósticos para valores de α con Errores (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-ses"></table></div>
+
+            <h4>6.2 Gráficos comparativos de Alfas (0.1 a 0.9)</h4>
+            <div class="chart-container"><canvas id="chart-ses"></canvas></div>
+
+            <h4>6.3 Análisis Crítico de Suavización Exponencial Simple (SES)</h4>
+            <p>La Suavización Exponencial Simple asigna pesos decrecientes a los datos históricos, permitiendo reaccionar más rápido a los cambios recientes mediante la calibración de la constante Alfa. Es un método ideal para series con ruido moderado a alto pero sin tendencia pronunciada. La evaluación de la matriz de parámetros determinó que un Alfa de 0.5 minimiza el Error Cuadrático Medio global (150.4 millones), logrando un balance óptimo que no reacciona exageradamente al ruido del 22.5% pero tampoco ignora las variaciones recientes de la demanda.</p>
+            <p>A pesar de su excelente desempeño histórico en la métrica de error, su limitación estructural es insalvable para este caso: el modelo SES no incorpora un parámetro de tendencia. Como resultado, la proyección a futuro (meses 37 a 42) se dibuja como una línea completamente plana. Aunque es el mejor modelo estático evaluado, debe descartarse como recomendación gerencial final, ya que asumir que las ventas dejarán de caer abruptamente expondrá a la empresa a un incremento de inventarios.</p>
+        </section>
+
+        <!-- TAB 7 -->
+        <section id="tab-7" class="tab-content">
+            <h3>7. Suavización exponencial doble (Holt)</h3>
+            
+            <h4>7.1 Tabla Completa de Pronósticos por Perfiles con Errores (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-holt"></table></div>
+
+            <h4>7.2 Gráficos con todas las combinaciones (Conservador, Moderado, Balanceado, Agresivo)</h4>
+            <div class="chart-container"><canvas id="chart-holt"></canvas></div>
+
+            <h4>7.3 Análisis Crítico del Método de Holt (Suavización Doble)</h4>
+            <p>El Método de Holt o Suavización Exponencial Doble introduce un segundo parámetro, Beta, diseñado específicamente para rastrear y suavizar la tendencia de una serie temporal. Es el modelo estrictamente apropiado para Agroindustrias del Tolima, dada la caída estructural del 3% mensual en la demanda. Tras evaluar cuatro perfiles, el perfil Moderado (Alfa=0.3, Beta=0.2) se consolida como el ganador absoluto en términos estratégicos.</p>
+            <p>Su principal fortaleza radica en que logra identificar la pendiente descendente de las ventas reales, proyectando un futuro (meses 37 al 42) en diagonal hacia abajo. Esta característica aborda directamente el problema principal de la empresa: envía una señal matemática clara a la planta de producción para que disminuya progresivamente los volúmenes de fabricación, evitando así los altos costos de almacenamiento (8%). Si bien su limitación teórica es que no captura las variaciones por estacionalidad (±5%), este impacto es marginal frente a los beneficios de modelar correctamente la tendencia a la baja en un entorno de alto ruido estadístico.</p>
+        </section>
+
+        <!-- TAB 8 -->
+        <section id="tab-8" class="tab-content">
+            <h3>8. Pronóstico con regresión lineal</h3>
+            
+            <h4>8.1 Tabla Completa de Pronósticos y Errores (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-regresion"></table></div>
+
+            <h4>8.2 Gráfico con línea de tendencia</h4>
+            <div class="chart-container"><canvas id="chart-regresion"></canvas></div>
+
+            <h4>8.3 Análisis de Residuos del Método de Regresión Lineal</h4>
+            <p>Para validar la idoneidad estadística del modelo de Regresión Lineal Simple aplicado a las ventas de Agroindustrias del Tolima, se procedió a realizar un análisis riguroso de sus residuos (la diferencia entre el valor real y el valor pronosticado por la recta). El diagnóstico arrojó los siguientes resultados paramétricos:</p>
+            <ul>
+                <li><strong>Media de los Residuos:</strong> Como es teóricamente esperado en un modelo de Mínimos Cuadrados Ordinarios (OLS), la media de los errores es exactamente 0.0000. Esto indica que el modelo no tiene un sesgo estructural sistemático (no sobreestima ni subestima de manera global).</li>
+                <li><strong>Normalidad de los Errores (Prueba de Shapiro-Wilk):</strong> Al someter los residuos a la prueba de Shapiro-Wilk, se obtuvo un valor p de 0.5290. Dado que este valor es considerablemente mayor al nivel de significancia del 0.05, no hay evidencia para rechazar la hipótesis nula. Se concluye que los residuos presentan una distribución normal, garantizando la validez de los intervalos de confianza del modelo.</li>
+                <li><strong>Independencia de los Errores (Autocorrelación):</strong> La prueba de Durbin-Watson arrojó un estadístico de 2.779. Un valor cercano a 2 indica ausencia de autocorrelación, pero un valor acercándose a 3 sugiere la presencia de una autocorrelación negativa moderada. Esto significa que el modelo lineal no está logrando capturar toda la dinámica temporal de la serie (posiblemente dejando escapar efectos estacionales o de suavización).</li>
+                <li><strong>Homocedasticidad (Varianza Constante):</strong> Al observar la dispersión de los errores a lo largo del tiempo, se mantienen dentro de una banda horizontal amplia sin formar patrones de embudo. Aunque la varianza parece constante, la desviación estándar de los residuos es altísima ($13.980).</li>
+            </ul>
+            <p><strong>Conclusión Estratégica:</strong> Aunque el modelo de Regresión Lineal cumple con los supuestos de media cero y normalidad, su altísima desviación estándar ($13.980) y la presencia de autocorrelación negativa indican que una simple línea recta es insuficiente para absorber el ruido extremo (22.5%) de la empresa. El modelo logra identificar la tendencia de caída general, pero falla en la predicción a corto plazo. Por lo tanto, aunque es un excelente complemento analítico, no debe usarse de forma aislada para planificar los inventarios del Grupo 3, justificando la transición hacia el modelo Holt o metodologías ARIMA.</p>
+        </section>
+
+        <!-- TAB 9 -->
+        <section id="tab-9" class="tab-content">
+            <h3>9. Pronóstico con ARIMA(1,1,1)</h3>
+            
+            <h4>9.1 Tabla Completa de Pronósticos y Errores (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-arima"></table></div>
+
+            <h4>9.2 Gráfico comparativo (Real vs ARIMA)</h4>
+            <div class="chart-container"><canvas id="chart-arima"></canvas></div>
+
+            <h4>9.3 Análisis Comparativo del Método ARIMA vs. Modelos Anteriores</h4>
+            <p>Al evaluar el rendimiento del modelo Autoregresivo Integrado de Media Móvil (ARIMA) aplicado a la serie histórica de Agroindustrias del Tolima, los resultados cuantitativos revelan una severa descalibración paramétrica. El cálculo del Error Cuadrático Medio (MSE) para el pronóstico ajustado por ARIMA arrojó un valor desproporcionado de 8.452 millones (8.45 billones en nomenclatura anglosajona), con una Desviación Media Absoluta (MAD) superior a las 86.000 unidades.</p>
+            <p>Al someter estos resultados a un análisis comparativo frente a los métodos evaluados previamente, se evidencian conclusiones estratégicas clave. En primer lugar, se observa un rendimiento deficiente frente a métodos rudimentarios: el modelo ARIMA, a pesar de ser estadísticamente el más sofisticado y complejo de la batería de pruebas, arrojó un error que es más de 11 veces mayor que el peor de los métodos básicos evaluados (el Promedio Simple, cuyo MSE fue de 755.6 millones). Esto demuestra que la parametrización específica calculada en la hoja de trabajo no logró estabilizar la varianza, provocando una acumulación explosiva del error.</p>
+            <p>En segundo lugar, al contrastarlo con modelos de suavización y regresión, el modelo ARIMA colapsó. Mientras que la Regresión Lineal logró minimizar el error global aislando matemáticamente la tendencia (MSE de 188.9 millones) y los modelos de Suavización Exponencial lograron amortiguar el ruido manteniendo errores controlados (entre 339 y 514 millones), la primera diferencia calculada para ARIMA fue insuficiente para volver estacionaria la serie ante fluctuaciones tan violentas, provocando que los errores pasados desestabilizaran por completo el pronóstico ajustado futuro.</p>
+            <p>Las implicaciones gerenciales de este resultado son críticas: si Agroindustrias del Tolima utilizara las proyecciones arrojadas por esta iteración de ARIMA, las órdenes de producción estarían desfasadas de la realidad en más de 86.000 unidades en promedio por mes. Este nivel de inexactitud paralizaría la cadena de suministro, incurriendo simultáneamente en costos masivos de almacenamiento (8%) y desabastecimiento. La evaluación confirma que un modelo complejo mal ajustado es significativamente más peligroso para la empresa que un modelo simple.</p>
+        </section>
+
+        <!-- TAB 10 -->
+        <section id="tab-10" class="tab-content">
+            <h3>10. Validación Mediante Métricas de Error</h3>
+            <p>Para validar qué modelo de pronóstico se ajusta mejor a la realidad de Agroindustrias del Tolima, se consolidó un cuadro de mando que clasifica los algoritmos desde el más preciso hasta el más deficiente, utilizando el Error Cuadrático Medio (MSE) y la Desviación Media Absoluta (MAD) calculados sobre los 30 periodos históricos.</p>
+            
+            <h4>10.1 Cuadro de Mando de Métricas de Error</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Método de Pronóstico</th><th>MSE</th><th>MAD</th><th>Estado de Validación</th></tr></thead>
+                    <tbody>
+                        <tr><td>Regresión Lineal Simple</td><td>188.940.000</td><td>11.154</td><td>Validado (Mejor ajuste global)</td></tr>
+                        <tr><td>Suavización Exponencial Simple (α=0.5)</td><td>339.625.500</td><td>15.027</td><td>Aceptable (Amortiguador)</td></tr>
+                        <tr><td>Método de Holt Doble</td><td>514.202.700</td><td>19.013</td><td>Aceptable (Captura tendencia)</td></tr>
+                        <tr><td>Último Valor (Naïve)</td><td>552.382.200</td><td>20.097</td><td>Descartado (Replica el ruido)</td></tr>
+                        <tr><td>Promedio Simple</td><td>755.551.500</td><td>23.679</td><td>Descartado (Ignora volatilidad)</td></tr>
+                        <tr><td>Método ARIMA</td><td>8.452.066.000</td><td>86.704</td><td>Rechazado (Descalibración severa)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>10.2 Comparativa Visual de Todos los Modelos (Periodos 1 a 30)</h4>
+            <div class="chart-container"><canvas id="chart-todas"></canvas></div>
+
+            <h4>10.3 Análisis de Selección del Modelo Óptimo</h4>
+            <p>El modelo óptimo matemático resultó ser la Regresión Lineal, minimizando la distancia cuadrática entre el pronóstico y el dato real. Al trazar una línea recta, logró ignorar las fluctuaciones caóticas y se centró exclusivamente en la caída del mercado, arrojando la menor desviación absoluta. Sin embargo, existe un empate estratégico con los modelos de suavización: aunque la Suavización Simple (SES) supera a Holt en precisión histórica, asume que las ventas dejarán de caer. Holt es superior estratégicamente porque proyecta la tendencia de declive. Por otro lado, la inviabilidad de métodos básicos y ARIMA quedó comprobada matemáticamente, debido a su rigidez ante un entorno inestable o a su descalibración paramétrica severa.</p>
+        </section>
+
+        <!-- TAB 11 -->
+        <section id="tab-11" class="tab-content">
+            <h3>11. Comparación Excel vs Inteligencia Artificial</h3>
+            
+            <h4>11.1 Introducción metodológica</h4>
+            <p>El presente informe constituye el corazón metodológico del Taller 1 de Analítica de Datos. Su propósito fundamental es comparar sistemáticamente los resultados obtenidos y la experiencia de usuario al desarrollar el caso "Agroindustrias del Tolima S.A.S." utilizando dos enfoques tecnológicos distintos: el procesamiento matricial tradicional mediante Microsoft Excel y el modelado avanzado mediante Inteligencia Artificial (IA). Esta comparativa no busca declarar una herramienta como obsoleta frente a la otra, sino identificar sus fortalezas relativas, sus debilidades operativas y, sobre todo, las oportunidades de integración para construir un flujo de trabajo analítico de grado gerencial.</p>
+
+            <h4>11.2 Tabla de Fortalezas y Debilidades Completas</h4>
+            <p>A continuación, se desglosa la evaluación técnica de ambas herramientas con base en la experiencia directa al procesar los 30 periodos de ventas, los modelos de suavización y el análisis de regresión, respetando los criterios exigidos en la rúbrica del caso.</p>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Herramienta</th><th>Ventajas</th><th>Limitaciones</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Microsoft Excel</strong></td>
+                            <td>• Interfaz visual sumamente intuitiva.<br>• Amplia adopción empresarial (estándar de la industria).<br>• Curva de aprendizaje inicial baja para estadística descriptiva.<br>• Fácil compartibilidad (archivos .xlsx universales).<br>• Ideal y altamente recomendado para el análisis exploratorio inicial.</td>
+                            <td>• Métodos avanzados limitados (no cuenta con motores nativos robustos para ARIMA o redes neuronales).<br>• Procesamiento muy lento y pesado para grandes volúmenes de datos transaccionales.<br>• Altamente propenso a errores manuales humanos (ej. desajuste de rangos en fórmulas al arrastrar celdas).<br>• Difícil reproducibilidad para auditorías complejas.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Inteligencia Artificial (IA)</strong></td>
+                            <td>• Métodos avanzados nativos incorporados (Machine Learning, ARIMA, modelos estadísticos complejos).<br>• Alta velocidad de cálculo masivo.<br>• Automatización completa de procesos repetitivos.<br>• Reproducibilidad garantizada mediante código o prompts estructurados.<br>• Escalabilidad analítica prácticamente ilimitada.</td>
+                            <td>• Requiere conocimientos de programación o de ingeniería de prompts ("Prompt Engineering").<br>• Curva de aprendizaje alta para dominar su potencial analítico.<br>• Menos intuitivo visualmente en la fase de exploración inicial de datos crudos.<br>• Requiere gestión formal de versiones y validación cruzada de alucinaciones.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>11.3 Análisis de Diferencias en Resultados (El factor del error manual)</h4>
+            <p>La aplicación paralela de ambas herramientas reveló diferencias críticas, no en la matemática subyacente, sino en la confiabilidad de la ejecución operativa. Durante el desarrollo del caso en Microsoft Excel, se evidenció la fragilidad del procesamiento manual: al calcular la desviación estándar histórica, la omisión en la fijación absoluta de rangos (falta de signos de dólar en la matriz) desencadenó un error en cascada de división por cero (#¡DIV/0!) al arrastrar la fórmula a lo largo de los 30 meses. Este fallo manual en Excel, aunque fácilmente corregible, paralizó temporalmente la cadena de cálculos de los coeficientes de variación y de los indicadores de error.</p>
+            <p>Por el contrario, al delegar el modelado avanzado (como la evaluación de Holt o el cálculo de residuos de la regresión lineal) al motor de Inteligencia Artificial, la diferencia operativa fue abismal. La IA, operando bajo un entorno automatizado (usualmente respaldado por scripts de Python o R), calculó las métricas de Error Cuadrático Medio (MSE) y Desviación Media Absoluta (MAD) para todos los modelos de forma simultánea, sin riesgo de errores por "arrastre manual". Mientras Excel exigía construir matrices celda por celda para evaluar los perfiles Conservador, Moderado, Balanceado y Agresivo, la IA iteró y optimizó los parámetros Alfa y Beta instantáneamente, garantizando una validación rigurosa y libre del factor de error humano que tanto afecta la planeación de la cadena de suministro.</p>
+
+            <h4>11.4 Recomendación de Flujo de Trabajo Híbrido</h4>
+            <p>Con base en las fortalezas complementarias identificadas, la recomendación gerencial para el departamento de planeación de Agroindustrias del Tolima S.A.S. es abandonar el uso exclusivo de hojas de cálculo aisladas y transitar hacia un ecosistema de analítica aumentada. Se propone el siguiente Flujo de Trabajo Híbrido en tres fases:</p>
+            <ul>
+                <li><strong>Fase 1: Excel como plataforma de exploración.</strong> El ciclo analítico debe iniciar en Microsoft Excel. Se aprovechará su interfaz visual intuitiva para cargar los datos crudos, realizar la limpieza inicial, ejecutar el Análisis Exploratorio de Datos (EDA) básico y lograr una comprensión visual rápida de la situación (identificando picos atípicos o estacionalidades evidentes antes de aplicar matemáticas complejas).</li>
+                <li><strong>Fase 2: IA como motor de modelado avanzado.</strong> Una vez los datos están limpios y comprendidos, la matriz histórica se inyectará en la plataforma de Inteligencia Artificial. En esta fase central, la IA se encargará del levantamiento pesado: ejecutará la optimización de parámetros, correrá la regresión lineal (evaluando sus residuos), iterará el método de Holt y realizará la validación cruzada rigurosa basada en el menor MSE y MAD de forma automatizada, eliminando el riesgo de errores manuales en los cálculos.</li>
+                <li><strong>Fase 3: Excel como interfaz de comunicación gerencial.</strong> Finalmente, los pronósticos depurados, los gráficos y el modelo ganador exportados por la IA se reintegrarán a un Dashboard ejecutivo en Excel (o Power BI). Esta última fase aprovecha la amplia adopción empresarial de las herramientas de Microsoft para comunicar los resultados de manera digerible a los stakeholders (directores, jefes de planta, inversores) que no poseen conocimientos técnicos en programación o ciencia de datos.</li>
+            </ul>
+
+            <h4>11.5 Reflexión sobre el futuro de la analítica</h4>
+            <p>El desarrollo de este taller evidencia que el futuro de la analítica corporativa no reside en una batalla de exclusión entre plataformas tradicionales y nuevas tecnologías, sino en la sinergia. Para empresas como Agroindustrias del Tolima, que enfrentan entornos hostiles caracterizados por altísimo ruido estadístico (22.5%) y tendencias de contracción (caídas del 3%), depender exclusivamente de procesos manuales en hojas de cálculo representa un riesgo financiero inaceptable (como el temido sobrestock).</p>
+            <p>La Inteligencia Artificial ha dejado de ser una promesa tecnológica para convertirse en un requisito de supervivencia empresarial. La automatización completa, la escalabilidad ilimitada y la reproducibilidad garantizada permiten que el analista de datos deje de ser un simple "constructor de fórmulas" propenso al error, para transformarse en un estratega. En el futuro inmediato, el valor del profesional analítico no radicará en su habilidad para arrastrar celdas en Excel, sino en su capacidad para orquestar flujos de trabajo híbridos donde la IA procesa la complejidad matemática y el humano lidera la interpretación estratégica del negocio.</p>
+        </section>
+
+        <!-- TAB 12 -->
+        <section id="tab-12" class="tab-content">
+            <h3>12. Recomendaciones Gerenciales y Plan de Acción</h3>
+            
+            <h4>12.1 Directrices Estratégicas para el Grupo 3</h4>
+            <ul>
+                <li><strong>Adopción del Método de Holt Moderado (α=0.3, β=0.2) complementado con Regresión Lineal:</strong> Utilizar la Regresión Lineal como referencia macro de la contracción (-3% mensual) y el modelo de Holt Moderado para la planeación operativa mensual, enviando una señal clara a producción para reducir volúmenes progresivamente y evitar el sobrestock (8% de costo de almacenamiento).</li>
+                <li><strong>Descarte definitivo de métodos estáticos y ARIMA sin recalibrar:</strong> Eliminar el uso de Promedio Simple, Naïve y Promedios Móviles, ya que sobrestiman sistemáticamente la demanda en un mercado decreciente.</li>
+                <li><strong>Gestión Dinámica de Inventarios ante Ruido Extremo (22.5%):</strong> Abandonar los inventarios de seguridad fijos y establecer bandas de control basadas en la mediana ($55.023) y percentiles (P10–P90), protegiendo el flujo de caja frente a fluctuaciones impredecibles (CV > 38%).</li>
+                <li><strong>Implementación del Flujo de Trabajo Híbrido:</strong> Consolidar la ingesta y limpieza en Excel, el modelado automatizado en IA/Python y la visualización directiva en Power BI para eliminar errores manuales de fórmula.</li>
+            </ul>
+
+            <h4>12.2 Base de Datos Consolidada (Anexo A: Periodos 1 a 30)</h4>
+            <div class="table-container">
+                <table class="styled-table" id="tabla-anexo-a"></table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <p>Integrantes: <span class="highlight">Alex Santiago Morales Valencia</span> y <span class="highlight">Angie Lorena García Ampudia</span></p>
+        <p>Docente: <span class="highlight">José Leonardo Montealegre</span></p>
+    </footer>
+
+    <script>
+        function openTab(evt, tabId) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabId).style.display = "block";
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const formatNum = (val) => {
+                if (val === null || val === undefined || isNaN(val)) return '-';
+                return new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 }).format(val);
+            };
+
+            const periodos30 = Array.from({length: 30}, (_, i) => i + 1);
+            const ventas100 = [125152.59, 89237.32, 118785.59, 68127.37, 103124.62, 84630.67, 85643.36, 98043.49, 86037.34, 73881.48, 55754.17, 77720.25, 66818.85, 68936.09, 92444.17, 60828.21, 83054.36, 42156.27, 63036.19, 47646.58, 65812.35, 48661.15, 23903.69, 51983.15, 22502.77, 52988.12, 48854.44, 40363.32, 34425.1, 35745.77, 39927.49, 34817.07, 34113.91, 37116.34, 42720.51, 34127.85, 35634.07, 21294.63, 38014.77, 39964.0, 30877.14, 28216.53, 27720.39, 27981.6, 23222.42, 20890.16, 28251.04, 26635.96, 16991.14, 23193.83, 25784.84, 22549.42, 20205.93, 18070.95, 11498.82, 18909.23, 18113.42, 21774.21, 15414.57, 14160.53, 14272.58, 18135.04, 16048.17, 13806.85, 17893.33, 20396.13, 10160.81, 14059.61, 16693.86, 13708.34, 12855.7, 11367.93, 10163.61, 10360.24, 13621.06, 9887.06, 8003.32, 7538.05, 10262.83, 11044.68, 6915.86, 8065.68, 7140.64, 8064.15, 8732.52, 6464.91, 6677.48, 7587.57, 5790.36, 9320.1, 5176.16, 5104.19, 6855.38, 7180.67, 6874.27, 4145.99, 5043.99, 6235.33, 5236.2, 5683.71];
+            const ventas30 = ventas100.slice(0, 30);
+            const ultimo_valor = [null, 125152.59, 89237.32, 118785.59, 68127.37, 103124.62, 84630.67, 85643.36, 98043.49, 86037.34, 73881.48, 55754.17, 77720.25, 66818.85, 68936.09, 92444.17, 60828.21, 83054.36, 42156.27, 63036.19, 47646.58, 65812.35, 48661.15, 23903.69, 51983.15, 22502.77, 52988.12, 48854.44, 40363.32, 34425.1];
+            const prom_simple = [null, 107194.96, 121969.09, 96639.98, 114138.6, 104891.63, 105397.98, 111598.04, 105594.96, 99517.04, 90453.38, 101436.42, 95985.72, 97044.34, 108798.38, 92990.4, 104103.48, 83654.43, 94094.39, 86399.58, 95482.47, 86906.87, 74528.14, 88567.87, 73827.68, 89070.35, 87003.51, 82757.96, 79788.85, 80449.18];
+            const n3 = [null, null, null, 111058.5, 92050.09, 96679.19, 85294.22, 91132.88, 89439.17, 89908.06, 85987.44, 71891.0, 69118.63, 66764.42, 71158.4, 76066.37, 74069.49, 78775.58, 62012.95, 62748.94, 50946.35, 58831.71, 54040.03, 46125.73, 41516.0, 32796.54, 42491.35, 41448.44, 47401.96, 41214.29];
+            const n6 = [null, null, null, null, null, null, 98176.36, 91591.49, 93059.18, 87601.14, 88560.16, 80665.08, 79513.35, 76375.93, 71524.7, 72592.5, 70416.96, 74966.99, 69039.66, 68409.22, 64860.96, 60422.33, 58394.48, 48536.04, 50173.85, 43418.28, 44308.54, 41482.22, 40099.25, 41852.82];
+            const n12 = [null, null, null, null, null, null, null, null, null, null, null, null, 88844.85, 83983.71, 82291.94, 80096.82, 79488.56, 77816.04, 74276.5, 72392.57, 68192.83, 66507.41, 64405.72, 61751.51, 59606.75, 55913.75, 54584.75, 50952.27, 49246.87, 45194.43];
+            const ses_01 = [null, 125152.59, 121561.06, 121283.52, 115967.9, 114683.57, 111678.28, 109074.79, 107971.66, 105778.23, 102588.55, 97905.12, 95886.63, 92979.85, 90575.47, 90762.34, 87768.93, 87297.47, 82783.35, 80808.64, 77492.43, 76324.42, 73558.1, 68592.66, 66931.7, 62488.81, 61538.74, 60270.31, 58279.61, 55894.16];
+            const ses_03 = [null, 125152.59, 114378.01, 115700.28, 101428.41, 101937.27, 96745.29, 93414.71, 94803.35, 92173.54, 86685.92, 77406.4, 77500.55, 74296.04, 72688.06, 78614.89, 73278.89, 76211.53, 65994.95, 65107.32, 59869.1, 61652.07, 57754.8, 47599.47, 48914.57, 40991.03, 44590.16, 45869.44, 44217.61, 41279.85];
+            const ses_05 = [null, 125152.59, 107194.96, 112990.27, 90558.82, 96841.72, 90736.2, 88189.78, 93116.63, 89576.99, 81729.23, 68741.7, 73230.98, 70024.91, 69480.5, 80962.34, 70895.27, 76974.82, 59565.54, 61300.87, 54473.72, 60143.04, 54402.09, 39152.89, 45568.02, 34035.4, 43511.76, 46183.1, 43273.21, 38849.15];
+            const ses_07 = [null, 125152.59, 100011.9, 113153.48, 81635.2, 96677.8, 88244.81, 86423.79, 94557.58, 88593.41, 78295.06, 62516.44, 73159.11, 68720.93, 68871.54, 85372.38, 68191.46, 78595.49, 53088.04, 60051.74, 51368.13, 61479.08, 52506.53, 32484.54, 46133.57, 29592.01, 45969.29, 47988.89, 42650.99, 36892.87];
+            const ses_09 = [null, 125152.59, 92828.85, 116189.92, 72933.62, 100105.52, 86178.16, 85696.84, 96808.82, 87114.49, 75204.78, 57699.23, 75718.15, 67708.78, 68813.36, 90081.09, 63753.5, 81124.27, 46053.07, 61337.88, 49015.71, 64132.69, 50208.3, 26534.15, 49438.25, 25196.32, 50208.94, 48989.89, 41225.98, 35105.19];
+            const holt_c = [null, 125152.59, 117251.23, 116870.48, 105459.38, 103283.25, 97470.51, 92786.31, 91624.12, 88181.4, 82710.06, 74168.4, 71799.33, 67624.18, 64733.75, 67677.23, 63571.84, 65122.41, 57723.93, 56087.37, 51531.38, 51805.37, 48531.43, 40468.24, 39863.87, 33137.08, 34249.74, 34605.22, 33306.55, 31102.33];
+            const holt_m = [null, 90104.0, 89792.0, 100177.69, 90327.19, 94698.86, 91606.75, 89388.28, 92074.7, 89991.11, 83919.26, 72540.87, 71476.58, 67181.69, 64915.71, 72033.65, 66859.1, 70876.47, 59695.99, 58334.04, 52122.55, 54045.62, 49923.35, 38049.34, 38997.39, 29827.24, 33943.4, 36479.26, 35940.08, 33690.28];
+            const holt_b = [null, 125152.59, 101807.66, 107456.03, 79051.8, 85959.23, 79966.69, 78328.26, 86666.4, 84738.03, 76067.44, 59621.49, 65096.38, 62641.49, 63416.85, 79912.67, 69489.94, 77426.3, 55654.94, 56316.4, 47651.86, 55126.54, 49318.48, 30223.5, 37979.68, 24796.05, 37675.72, 43725.52, 42000.53, 37032.61];
+            const holt_a = [null, 125152.59, 87441.56, 107782.45, 64544.68, 89574.41, 82407.25, 82098.63, 96266.83, 88532.67, 72575.4, 49211.67, 67556.81, 65171.09, 67255.19, 93152.22, 67476.75, 80784.58, 42628.36, 52940.18, 43408.24, 61106.13, 50053.92, 20255.45, 42076.23, 21135.48, 47341.43, 52839.19, 44178.18, 34009.54];
+            const regresion = [103524.0, 101020.0, 98516.0, 96012.0, 93508.0, 91004.0, 88500.0, 85996.0, 83492.0, 80988.0, 78484.0, 75980.0, 73476.0, 70972.0, 68468.0, 65964.0, 63460.0, 60956.0, 58452.0, 55948.0, 53444.0, 50940.0, 48436.0, 45932.0, 43428.0, 40924.0, 38420.0, 35916.0, 33412.0, 30908.0];
+            const arima = [125152.59, 125152.59, 159990.4, 129559.75, 178428.87, 141724.0, 158698.15, 155864.15, 142080.51, 152625.55, 162752.03, 178113.75, 153747.67, 162421.34, 157977.55, 132948.68, 162603.55, 138499.8, 176784.81, 153165.57, 165840.26, 145264.62, 159914.98, 181148.37, 149980.18, 176126.22, 142714.84, 144481.35, 150327.06, 153338.04];
+
+            const err = (real, pred) => (pred !== null && pred !== undefined) ? +(real - pred).toFixed(2) : null;
+
+            function buildTable(tableId, headers, dataRows) {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+                let html = '<thead><tr>';
+                headers.forEach(h => html += `<th>${h}</th>`);
+                html += '</tr></thead><tbody>';
+                dataRows.forEach(row => {
+                    html += '<tr>';
+                    row.forEach(cell => {
+                        if (cell === null || cell === undefined) {
+                            html += '<td>-</td>';
+                        } else if (typeof cell === 'number') {
+                            html += `<td>${formatNum(cell)}</td>`;
+                        } else {
+                            html += `<td>${cell}</td>`;
+                        }
+                    });
+                    html += '</tr>';
+                });
+                html += '</tbody>';
+                table.innerHTML = html;
+            }
+
+            buildTable('tabla-100-periodos', ['Periodo', 'Ventas Simuladas ($)'], Array.from({length: 100}, (_, i) => [i + 1, ventas100[i]]));
+            buildTable('table-ultimo-valor', ['Periodo', 'Ventas Reales', 'Pronóstico (Último Valor)', 'Error'], periodos30.map(i => [i, ventas30[i-1], ultimo_valor[i-1], err(ventas30[i-1], ultimo_valor[i-1])]));
+            buildTable('table-prom-simple', ['Periodo', 'Ventas Reales', 'Pronóstico (Promedio Simple)', 'Error'], periodos30.map(i => [i, ventas30[i-1], prom_simple[i-1], err(ventas30[i-1], prom_simple[i-1])]));
+            buildTable('table-movil', ['Periodo', 'Ventas', 'n=3', 'Error n=3', 'n=6', 'Error n=6', 'n=12', 'Error n=12'], periodos30.map(i => [i, ventas30[i-1], n3[i-1], err(ventas30[i-1], n3[i-1]), n6[i-1], err(ventas30[i-1], n6[i-1]), n12[i-1], err(ventas30[i-1], n12[i-1])]));
+            buildTable('table-ses', ['Periodo', 'Ventas', 'α=0.1', 'Err 0.1', 'α=0.3', 'Err 0.3', 'α=0.5', 'Err 0.5', 'α=0.7', 'Err 0.7', 'α=0.9', 'Err 0.9'], periodos30.map(i => [i, ventas30[i-1], ses_01[i-1], err(ventas30[i-1], ses_01[i-1]), ses_03[i-1], err(ventas30[i-1], ses_03[i-1]), ses_05[i-1], err(ventas30[i-1], ses_05[i-1]), ses_07[i-1], err(ventas30[i-1], ses_07[i-1]), ses_09[i-1], err(ventas30[i-1], ses_09[i-1])]));
+            buildTable('table-holt', ['Periodo', 'Ventas', 'Conserv.', 'Err Cons.', 'Moderado', 'Err Mod.', 'Balanceado', 'Err Bal.', 'Agresivo', 'Err Agr.'], periodos30.map(i => [i, ventas30[i-1], holt_c[i-1], err(ventas30[i-1], holt_c[i-1]), holt_m[i-1], err(ventas30[i-1], holt_m[i-1]), holt_b[i-1], err(ventas30[i-1], holt_b[i-1]), holt_a[i-1], err(ventas30[i-1], holt_a[i-1])]));
+            buildTable('table-regresion', ['Periodo', 'Ventas Reales', 'Pronóstico (Regresión)', 'Error'], periodos30.map(i => [i, ventas30[i-1], regresion[i-1], err(ventas30[i-1], regresion[i-1])]));
+            buildTable('table-arima', ['Periodo', 'Ventas Reales', 'Pronóstico (ARIMA)', 'Error'], periodos30.map(i => [i, ventas30[i-1], arima[i-1], err(ventas30[i-1], arima[i-1])]));
+            buildTable('tabla-anexo-a', ['Per.', 'Ventas', 'Último Valor', 'Prom. Simple', 'MA n=3', 'SES α=0.5', 'Holt (Mod.)', 'Regresión', 'ARIMA'], periodos30.map(i => [i, ventas30[i-1], ultimo_valor[i-1], prom_simple[i-1], n3[i-1], ses_05[i-1], holt_m[i-1], regresion[i-1], arima[i-1]]));
+
+            Chart.defaults.font.family = 'Montserrat';
+            Chart.defaults.color = '#2c3e50';
+
+            const chartOptions = (titleY) => ({
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    zoom: {
+                        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
+                        pan: { enabled: true, mode: 'x' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Periodo (mes)' }, grid: { color: 'rgba(200,200,200,0.2)' } },
+                    y: { title: { display: true, text: titleY }, grid: { color: 'rgba(200,200,200,0.2)' } }
+                }
+            });
+
+            new Chart(document.getElementById('chart-100'), {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 100}, (_, i) => i + 1),
+                    datasets: [{ label: 'Ventas Simuladas (100 Periodos)', data: ventas100, borderColor: '#b76e79', backgroundColor: 'rgba(183, 110, 121, 0.1)', fill: true, tension: 0.3, pointRadius: 1 }]
+                },
+                options: chartOptions('Ventas ($)')
+            });
+
+            new Chart(document.getElementById('chart-ultimo-valor'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'Pronóstico (Último Valor)', data: ultimo_valor, borderColor: '#d4a5a5', backgroundColor: '#d4a5a5', borderDash: [5, 5], tension: 0.1 }
+                    ]
+                },
+                options: chartOptions('Ventas ($)')
+            });
+
+            new Chart(document.getElementById('chart-promedio-simple'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'Pronóstico (Promedio Simple)', data: prom_simple, borderColor: '#e69a8d', backgroundColor: '#e69a8d', tension: 0.1 }
+                    ]
+                },
+                options: chartOptions('Ventas ($)')
+            });
+
+            new Chart(document.getElementById('chart-promedio-movil'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'Promedio Móvil n=3', data: n3, borderColor: '#b76e79', backgroundColor: '#b76e79', tension: 0.3 },
+                        { label: 'Promedio Móvil n=6', data: n6, borderColor: '#7395ae', backgroundColor: '#7395ae', tension: 0.3, borderDash: [5, 5] },
+                        { label: 'Promedio Móvil n=12', data: n12, borderColor: '#557a95', backgroundColor: '#557a95', tension: 0.3, borderDash: [2, 2] }
+                    ]
+                },
+                options: chartOptions('Ventas ($)')
+            });
+
+            new Chart(document.getElementById('chart-ses'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'SES (α=0.1)', data: ses_01, borderColor: '#e8c1c5', tension: 0.2 },
+                        { label: 'SES (α=0.3)', data: ses_03, borderColor: '#d4a5a5', tension: 0.2 },
+                        { label: 'SES (α=0.5)', data: ses_05, borderColor: '#b76e79', tension: 0.2 },
+                        { label: 'SES (α=0.7)', data: ses_07, borderColor: '#965a63', tension: 0.2 },
+                        { label: 'SES (α=0.9)', data: ses_09, borderColor: '#693c44', tension: 0.2 }
+                    ]
+                },
+                options: chartOptions('Ventas ($)')
+            });
+
+            new Chart(document.getElementById('chart-holt'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'Conservador (0.2/0.1)', data: holt_c, borderColor: '#a3c4bc', tension: 0.2 },
+                        { label: 'Moderado (0.3/0.2)', data: holt_m, borderColor: '#66827a', tension: 0.2 },
+                        { label: 'Balanceado (0.5/0.3)', data: holt_b, borderColor: '#4a7c59', tension: 0.2 },
+                        { label: 'Agresivo (0.7/0.5)', data: holt_a, borderColor: '#2c4a35', tension: 0.2 }
+                    ]
+                },
+                options: chartOptions('Ventas ($)')
+            });
+
+            new Chart(document.getElementById('chart-regresion'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: 'transparent', pointBackgroundColor: '#2c3e50', type: 'scatter' },
+                        { label: 'Línea de Tendencia', data: regresion, borderColor: '#e08e79', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0 }
+                    ]
+                },
+                options: chartOptions('Ventas ($)')
+            });
+
+            new Chart(document.getElementById('chart-arima'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'ARIMA (1,1,1)', data: arima, borderColor: '#d38b5d', backgroundColor: '#d38b5d', tension: 0.2 }
+                    ]
+                },
+                options: chartOptions('Ventas ($)')
+            });
+
+            new Chart(document.getElementById('chart-todas'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'Regresión Lineal', data: regresion, borderColor: '#e08e79', borderDash: [5,5], tension: 0.1 },
+                        { label: 'SES (α=0.5)', data: ses_05, borderColor: '#b76e79', borderDash: [5,5], tension: 0.2 },
+                        { label: 'Holt (Moderado)', data: holt_m, borderColor: '#4a7c59', borderDash: [5,5], tension: 0.2 },
+                        { label: 'Último Valor', data: ultimo_valor, borderColor: '#d4a5a5', borderDash: [5,5], tension: 0.2 },
+                        { label: 'Promedio Móvil (n=3)', data: n3, borderColor: '#9a6a6a', borderDash: [5,5], tension: 0.2 },
+                        { label: 'Promedio Simple', data: prom_simple, borderColor: '#e69a8d', borderDash: [5,5], tension: 0.1 },
+                        { label: 'ARIMA', data: arima, borderColor: '#d38b5d', borderDash: [5,5], tension: 0.2 }
+                    ]
+                },
+                options: chartOptions('Ventas ($)')
+            });
+        });
+    </script>
+</body>
+</html>
